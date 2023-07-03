@@ -1,0 +1,64 @@
+[
+    {
+        "id": "1",
+        "nameProject": "Gán nhãn",
+        "type": {
+            "type": "3",
+            "listNhan": [
+                "nhãn 1",
+                "nhãn 2",
+                "nhãn 3"
+            ]
+        },
+        "listEmployee": [
+            "2",
+            "8",
+            "12"
+        ],
+        "time": "12/02/2023",
+        "timeEnd": "",
+        "dataSequence": [
+            [
+                "Câu 1",
+                "câu 2"
+            ],
+            [
+                "câu 3",
+                "câu 4"
+            ]
+        ],
+        "maxEmployees": "30",
+        "status": 0
+    },
+    {
+        "id": "2",
+        "nameProject": "Gán nhãn",
+        "type": {
+            "type": "3",
+            "listNhan": [
+                "nhãn 1",
+                "nhãn 2",
+                "nhãn 3"
+            ]
+        },
+        "listEmployee": [
+            "2",
+            "8",
+            "12"
+        ],
+        "time": "",
+        "timeEnd": "",
+        "dataSequence": [
+            [
+                "Câu 1",
+                "câu 2"
+            ],
+            [
+                "câu 3",
+                "câu 4"
+            ]
+        ],
+        "maxEmployees": "30",
+        "status": 1
+    }
+]

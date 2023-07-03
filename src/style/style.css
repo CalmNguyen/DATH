@@ -1,0 +1,22 @@
+.tk-gradient {
+    background: linear-gradient(to right, #8a2387, #e94057, #f27121);
+    height: 120px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tk-gradient-each {
+    width: 25%;
+    padding: 0;
+    margin-top: 0;
+}
+
+.tk-gradient-each p {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10;
+    border-width: 2px solid red;
+}
