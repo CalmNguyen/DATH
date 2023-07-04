@@ -145,8 +145,92 @@ mydb = mysql.connector.connect(
     host="localhost",
     user="root",
     password="",
-    database="connecting"
+    database="udpt"
 )
+@app.route('/login', methods=['POST'])
+def check_login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    cursor = mydb.cursor()
+    query = "SELECT * FROM admin WHERE email = %s AND password = %s"
+    values = (email, password)
+    cursor.execute(query, values)
+    admin = cursor.fetchone()
+
+    if admin:
+        result = {"result": 1, "message": "Đăng nhập thành công"}
+    else:
+        result = {"result": 0, "message": "Email hoặc mật khẩu không đúng"}
+
+    return jsonify(result)
+@app.route('/employees', methods=['GET'])
+def get_employees():
+    cursor = mydb.cursor()
+    query = "SELECT * FROM employee"
+    cursor.execute(query)
+    employees = cursor.fetchall()
+
+    employee_list = []
+    for employee in employees:
+        employee_object = {
+            'id': employee[0],
+            'name': employee[1],
+            'level': employee[2],
+            'project_join': employee[3],
+            'status': employee[4]
+        }
+        employee_list.append(employee_object)
+
+    if employee_list:
+        result = {"result": 1, "message": "Lấy danh sách nhân viên thành công", "data": employee_list}
+    else:
+        result = {"result": 0, "message": "Không có nhân viên", "data": []}
+
+    return jsonify(result)
+@app.route('/projects', methods=['GET'])
+def get_projects():
+    cursor = mydb.cursor()
+    query = "SELECT * FROM project"
+    cursor.execute(query)
+    projects = cursor.fetchall()
+
+    project_list = []
+    for project in projects:
+        project_id = project[0]  # ID của dự án
+        employees_query = f"SELECT employeeID FROM employee_project WHERE projectID = {project_id}"
+        cursor.execute(employees_query)
+        employee_rows = cursor.fetchall()
+
+        employee_list = [employee_row[0] for employee_row in employee_rows]  # Lấy danh sách id của employees
+
+        project_object = {
+            'id': project[0],
+            'nameProject': project[1],
+            'type': {
+                'type': project[2],
+                'listNhan': project[3].split(","),
+                'language': {
+                    'input': project[8],
+                    'output': project[9]
+                }
+            },
+            'listEmployee': employee_list,
+            'time': project[4],
+            'timeEnd': project[5],
+            'dataSequence': project[10],
+            'maxEmployees': project[6],
+            'status': project[7]
+        }
+        project_list.append(project_object)
+
+    if project_list:
+        result = {"result": 1, "message": "Lấy danh sách dự án thành công", "data": project_list}
+    else:
+        result = {"result": 0, "message": "Không có dự án", "data": []}
+
+    return jsonify(result)
 
 @app.route("/t", methods=['GET'])
 def index():

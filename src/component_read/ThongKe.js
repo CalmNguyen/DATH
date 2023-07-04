@@ -1,7 +1,7 @@
 import { useEffect, useState, memo } from 'react';
-import '../css/style.css'
-import '../style/bootstrap.css'
-import '../style/bootstrap.min.css'
+import '../../css/style.css'
+import '../../style/bootstrap.css'
+import '../../style/bootstrap.min.css'
 import { AiFillCloseCircle, AiFillCheckCircle, AiTwotoneEdit } from "react-icons/ai";
 import { IconName } from "react-icons/fa";
 
