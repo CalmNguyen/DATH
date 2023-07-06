@@ -7,6 +7,30 @@ Modal.setAppElement('#root'); // Thiết lập phần tử gốc của ứng d�
 
 function List_Project() {
     const [data, set_data] = useState([])
+    const [employee, set_employee] = useState([])
+    useEffect(() => {
+        // fetch('http://127.0.0.1:5000/list-project', {
+        fetch('http://127.0.0.1:5000/employees', {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + 'token'
+            },
+            timeout: 2000,
+            // body: JSON.stringify([]),
+        }).then((response) => response.json())
+            .then((actualData) => {
+                // console.log(actualData)
+                if (actualData.result == 1) {
+                    set_employee(actualData.data)
+
+                }
+                else {
+                    alert(actualData.message)
+                }
+            });
+    }, [])
     useEffect(() => {
         // fetch('http://127.0.0.1:5000/list-project', {
         fetch('http://127.0.0.1:5000/projects', {
@@ -54,16 +78,16 @@ function List_Project() {
                     <p style={{ fontSize: 18, fontWeight: 400 }}>Mẫu API dữ liệu</p>
                 </div>
                 <div className='tk-gradient-each'>
-                    <p style={{ fontSize: 20, fontWeight: 600 }}>879</p>
+                    <p style={{ fontSize: 20, fontWeight: 600 }}>{data.length}</p>
                     <p style={{ fontSize: 18, fontWeight: 400 }}>Dự án</p>
                 </div>
                 <div className='tk-gradient-each'>
-                    <p style={{ fontSize: 20, fontWeight: 600 }}>879</p>
-                    <p style={{ fontSize: 18, fontWeight: 400 }}>Thành viên</p>
+                    <p style={{ fontSize: 20, fontWeight: 600 }}>2</p>
+                    <p style={{ fontSize: 18, fontWeight: 400 }}>Dự án hoàn thành</p>
                 </div>
                 <div className='tk-gradient-each'>
-                    <p style={{ fontSize: 20, fontWeight: 600 }}>90</p>
-                    <p style={{ fontSize: 18, fontWeight: 400 }}>Thành viên level 4</p>
+                    <p style={{ fontSize: 20, fontWeight: 600 }}>{employee.length}</p>
+                    <p style={{ fontSize: 18, fontWeight: 400 }}>Thành viên</p>
                 </div>
             </div>
 
@@ -78,7 +102,7 @@ function List_Project() {
                 <div style={{ width: '10%', fontWeight: 600 }}><p>Action</p></div>
             </div>
             {data.map((item, index) => (
-                <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20 }}>
+                <div style={{ display: 'flex', flexDirection: 'row', marginTop: 20, marginBottom: 20 }}>
                     <div style={{ width: '20%', fontWeight: 400, marginRight: 10 }}><p>{item.nameProject}</p></div>
                     <div style={{ width: '20%', fontWeight: 400, marginRight: 10 }}><p>{type_name[item.type.type]}</p></div>
                     <div style={{ width: '15%', fontWeight: 400, marginRight: 10 }}><p>{item.listEmployee.length}</p></div>
@@ -86,6 +110,7 @@ function List_Project() {
                     <div style={{ width: '12%', fontWeight: 400 }}><p>{item.time}</p></div>
                     <div style={{ width: '12%', fontWeight: 400, display: 'flex', alignItems: 'center', }}><p style={{ border: '1px solid rgba(0,0,0,0.5)', width: '80%', textAlign: 'center', borderRadius: 10, justifyContent: 'center', display: 'flex', alignItems: 'center', backgroundColor: backgroundColor[item.status], color: 'black' }}>{item.status == 0 ? 'Processing' : item.status == 1 ? 'Finished' : 'Lated'}</p></div>
                     <div style={{ marginLeft: 0, width: '10%', flexDirection: 'column', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <a href={'/bieu-do/' + item.id} style={{ marginLeft: 0, color: '#43BFC7' }}>Thống kê</a>
                         <a href={'/about/' + item.id} style={{ marginLeft: 0 }}>Xem chi tiết</a>
                         <a href={'/edit-project/' + item.id} style={{ marginLeft: 0, color: 'red' }}>Điều chỉnh</a>
                         {/* <a href={'/edit-project/' + item.id} style={{ marginLeft: 0, color: 'red' }}>Điều chỉnh</a> */}

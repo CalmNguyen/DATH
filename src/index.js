@@ -13,6 +13,8 @@ import EditProject from './component_product/EditProject';
 import ViewInfo from './component_product/viewInfo';
 import Login from './component_read/login';
 import Upgrade_user from './component_read/upgrade_user';
+import Upgrade_detail from './component_read/upgrade_detail';
+import SignUpForm from './component_read/signup';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
@@ -23,11 +25,13 @@ root.render(
           <Routes>
             <Route path="/home" element={<QuanLyTaiKhoan />} />
             <Route path="/" element={<Login />} />
+            <Route path="/signup" element={<SignUpForm />} />
             <Route path="/about/:id" element={<ViewInfo />} />
             <Route path="/bieu-do/:id" element={<Bieudotron />} />
             <Route path="/edit-project/:id" element={<EditProject />} />
             <Route path='/ds-du-an' element={<List_Project />} />
             <Route path='/upgrade-user' element={<Upgrade_user />} />
+            <Route path='/upgrade/:id' element={<Upgrade_detail />} />
           </Routes>
         </div>
       </AuthProvider>

@@ -78,11 +78,11 @@ function CSVReader({ open_detail, set_open_detail, csvData, setCSVData, type, tu
                     </div>
                 </div>
                 {them_dong && (<div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div class="form-group" style={{ width: (type == 2 || type == 5 || type == 6) ? '40%' : '85%' }}>
+                    <div class="form-group" style={{ width: (type == "Type 2" || type == "Type 5" || type == "Type 6") ? '40%' : '85%' }}>
                         <label for="exampleFormControlInput1">Cột 2</label>
                         <input type="text" class="form-control" value={cot2} onChange={(event) => set_cot2(event.target.value)} id="exampleFormControlInput1" placeholder="Nhập cột 2"></input>
                     </div>
-                    {(type == 2 || type == 5 || type == 6) &&
+                    {(type == "Type 2" || type == "Type 5" || type == "Type 6") &&
                         (<div class="form-group" style={{ width: '40%', marginLeft: '5%' }}>
                             <label for="exampleFormControlInput1">Cột 3</label>
                             <input type="text" class="form-control" value={cot3} onChange={(event) => set_cot3(event.target.value)} id="exampleFormControlInput1" placeholder="Nhập cột 3"></input>
@@ -127,11 +127,11 @@ function CSVReader({ open_detail, set_open_detail, csvData, setCSVData, type, tu
 
                 </div>
                 {edit_dong && vi_tri_edit >= 0 && vi_tri_edit < csvData.length && (<div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <div class="form-group" style={{ width: (type == 2 || type == 5 || type == 6) ? '40%' : '85%' }}>
+                    <div class="form-group" style={{ width: (type == "Type 2" || type == "Type 5" || type == "Type 6") ? '40%' : '85%' }}>
                         <label for="exampleFormControlInput1">Cột 2 - Dòng {vi_tri_edit_new}</label>
                         <textarea rows="5" style={{ overflow: 'auto', wordBreak: 'break-all', wordWrap: 'break-word' }} type="text" class="form-control" value={edit_cot2} onChange={(event) => set_edit_cot2(event.target.value)} id="exampleFormControlInput1" placeholder="Nhập cột 2"></textarea>
                     </div>
-                    {(type == 2 || type == 5 || type == 6) &&
+                    {(type == "Type 2" || type == "Type 5" || type == "Type 6") &&
                         (<div class="form-group" style={{ width: '40%', marginLeft: '5%' }}>
                             <label for="exampleFormControlInput1">Cột 3 - Dòng {vi_tri_edit_new}</label>
                             <textarea rows={1} type="text" class="form-control" value={edit_cot3} onChange={(event) => set_edit_cot3(event.target.value)} id="exampleFormControlInput1" placeholder="Nhập cột 3"></textarea>
@@ -187,8 +187,8 @@ function CSVReader({ open_detail, set_open_detail, csvData, setCSVData, type, tu
                         {csvData[0] && (
                             <tr style={{ border: '1px solid #736F6E', }}>
                                 <th style={{ border: '1px solid #736F6E', width: 30, textAlign: 'center' }} >STT</th>
-                                <th style={{ border: '1px solid #736F6E', width: (type == "2" || type == "5" || type == "6") ? '40%' : '90%' }} >{csvData[0][0]}</th>
-                                {(type == "2" || type == "5" || type == "6") && (<th style={{ border: '1px solid #736F6E', width: '40%' }} >{csvData[0][1]}</th>)}
+                                <th style={{ border: '1px solid #736F6E', width: (type == "Type 2" || type == "Type 5" || type == "Type 6") ? '40%' : '90%' }} >{csvData[0][0]}</th>
+                                {(type == "Type 2" || type == "Type 5" || type == "Type 6") && (<th style={{ border: '1px solid #736F6E', width: '40%' }} >{csvData[0][1]}</th>)}
                             </tr>
                         )}
 
@@ -204,8 +204,8 @@ function CSVReader({ open_detail, set_open_detail, csvData, setCSVData, type, tu
                         {csvData.slice(1).map((row, rowIndex) => (
                             <tr style={{ border: '1px solid #736F6E' }} key={rowIndex}>
                                 <td style={{ border: '1px solid #736F6E', width: 30, textAlign: 'center' }}>{rowIndex + 1}</td>
-                                <td style={{ border: '1px solid #736F6E', width: (type == "2" || type == "5" || type == "6") ? '40%' : '90%' }}>{row[0]}</td>
-                                {(type == "2" || type == "5" || type == "6") && (<td style={{ border: '1px solid #736F6E', width: '40%' }}>{row[1]}</td>)}
+                                <td style={{ border: '1px solid #736F6E', width: (type == "Type 2" || type == "Type 5" || type == "Type 6") ? '40%' : '90%' }}>{row[0]}</td>
+                                {(type == "Type 2" || type == "Type 5" || type == "Type 6") && (<td style={{ border: '1px solid #736F6E', width: '40%' }}>{row[1]}</td>)}
                             </tr>
                         ))}
                     </tbody>

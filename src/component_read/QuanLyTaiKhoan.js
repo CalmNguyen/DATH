@@ -1,5 +1,6 @@
 import { useState, useEffect, memo, useContext } from 'react';
 import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import '../css/style.css'
 import '../style/bootstrap.css'
@@ -16,7 +17,7 @@ import { auth } from '../auth';
 import Header from '../header'
 function QuanLyTaiKhoan({ project }) {
     const { isLogin, user, setUser, setIsLogin } = useContext(auth);
-    const [type, set_type] = useState(project && project.length > 0 ? project.type.type : "1")
+    const [type, set_type] = useState(project && project.length > 0 ? project.type.type : "Type 1")
     const [open_chon_nhan, set_open_chon_nhan] = useState(false)
     const [listData, set_listData] = useState(project && project.length > 0 ? project.type.listNhan : [])
     const [thong_ke, set_thong_ke] = useState([3, 2, 5])
@@ -55,6 +56,7 @@ function QuanLyTaiKhoan({ project }) {
                 }
             });
     }, [])
+    const navigate = useNavigate()
     const createProject = async () => {
         const data_post = {
             nameProject: nameProject,
@@ -81,9 +83,11 @@ function QuanLyTaiKhoan({ project }) {
                 body: JSON.stringify(data_post),
             });
 
-            if (response.ok) {
-                const jsonData = await response.json();
-                console.log(jsonData);
+            if (response.status == 200) {
+                alert("Thêm thành công")
+                navigate('/ds-du-an')
+                // const jsonData = await response.json();
+                // console.log(jsonData);
                 // Xử lý thành công
             } else {
                 // Xử lý lỗi
@@ -159,7 +163,7 @@ function QuanLyTaiKhoan({ project }) {
                         <option value="Type 7">Tìm câu hỏi đồng nghĩa</option>
                     </select>
                 </div>
-                {type == 3 && (
+                {type == "Type 3" && (
                     <div className="form-group" style={{ width: '100%', display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu vào</label>
@@ -180,7 +184,7 @@ function QuanLyTaiKhoan({ project }) {
                         </div>
                     </div>
                 )}
-                {(type == 1 && <div className="form-group" style={{ width: '100%' }}>
+                {(type == "Type 1" && <div className="form-group" style={{ width: '100%' }}>
                     <label htmlFor="exampleFormControlInput1">Loại nhãn</label>
                     <div className='form-group' style={{ display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '80%', display: 'flex', flexDirection: 'row', border: '1px solid #736F6E', alignItems: 'center', borderRadius: 5, flexWrap: 'wrap' }}>

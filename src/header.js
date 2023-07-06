@@ -7,14 +7,17 @@ export default function header() {
                 <li className="navbar-item">
                     <Link to="/home">Tạo project</Link>
                 </li>
-                {/* <li className="navbar-item">
-                    <Link to="/about/1">Thống kê</Link>
-                </li> */}
+                <li className="navbar-item">
+                    <Link to="/bieu-do/10">Thống kê</Link>
+                </li>
                 <li className="navbar-item">
                     <Link to="/ds-du-an">Danh sách project</Link>
                 </li>
                 <li className="navbar-item">
                     <Link to="/upgrade-user">Điều chỉnh level</Link>
+                </li>
+                <li className="navbar-item">
+                    <Link to="/">Đăng xuất</Link>
                 </li>
             </ul>
         </nav>

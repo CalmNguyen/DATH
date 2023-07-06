@@ -146,7 +146,7 @@ function EditProject({ project }) {
                         <option value="7">Tìm câu hỏi đồng nghĩa</option>
                     </select>
                 </div>
-                {type == 3 && (
+                {type == "Type 3" && (
                     <div className="form-group" style={{ width: '100%', display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu vào</label>
@@ -163,7 +163,7 @@ function EditProject({ project }) {
                         </div>
                     </div>
                 )}
-                {(type == 1 && <div className="form-group" style={{ width: '100%' }}>
+                {(type == "Type 1" && <div className="form-group" style={{ width: '100%' }}>
                     <label htmlFor="exampleFormControlInput1">Loại nhãn</label>
                     <div className='form-group' style={{ display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '80%', display: 'flex', flexDirection: 'row', border: '1px solid #736F6E', alignItems: 'center', borderRadius: 5, flexWrap: 'wrap' }}>

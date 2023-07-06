@@ -1,4 +1,5 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { CSVLink } from 'react-csv';
 import '../App.css';
@@ -11,6 +12,7 @@ import ReadFile from '../component_read/ReadFile'
 import ModalEmployees from '../component_read/ModalEmployees';
 import Header from '../header'
 function EditProject({ project }) {
+    const navigate = useNavigate();
     const { id } = useParams();
     const [type, set_type] = useState(project && project.length > 0 ? project.type.type : "1")
     const [open_chon_nhan, set_open_chon_nhan] = useState(false)
@@ -69,6 +71,7 @@ function EditProject({ project }) {
                     set_language(data.type.language)
                     set_listDataEmployeesSelected(data.listEmployee)
                     setCSVData(data.dataSequence)
+                    set_listData(data.type.listNhan[0].split(','))
                     set_maxEmployees(data.maxEmployees)
                 }
                 else {
@@ -106,6 +109,7 @@ function EditProject({ project }) {
                 const jsonData = await response.json();
                 console.log(jsonData);
                 alert("Thành công")
+                navigate('/ds-du-an');
                 // Xử lý thành công
             } else {
                 // Xử lý lỗi
@@ -148,24 +152,32 @@ function EditProject({ project }) {
                         <option value="7">Tìm câu hỏi đồng nghĩa</option>
                     </select>
                 </div>
-                {type == 3 && (
+                {type == "Type 3" && (
                     <div className="form-group" style={{ width: '100%', display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu vào</label>
                             <div >
-                                <input style={{ flex: 1, width: '90%' }} value={language.input} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
+                                <input style={{ flex: 1, width: '90%' }}
+                                    onChange={(event) => {
+                                        set_language({ ...language, input: event.target.value })
+                                    }}
+                                    type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
                             </div>
                         </div>
 
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu ra</label>
                             <div >
-                                <input style={{ flex: 1, width: '100%' }} value={language.output} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
+                                <input style={{ flex: 1, width: '100%' }}
+                                    onChange={(event) => {
+                                        set_language({ ...language, ouput: event.target.value })
+                                    }}
+                                    type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
                             </div>
                         </div>
                     </div>
                 )}
-                {(type == 1 && <div className="form-group" style={{ width: '100%' }}>
+                {(type == "Type 1" && <div className="form-group" style={{ width: '100%' }}>
                     <label htmlFor="exampleFormControlInput1">Loại nhãn</label>
                     <div className='form-group' style={{ display: 'flex', flexDirection: 'row' }}>
                         <div style={{ width: '80%', display: 'flex', flexDirection: 'row', border: '1px solid #736F6E', alignItems: 'center', borderRadius: 5, flexWrap: 'wrap' }}>

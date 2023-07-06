@@ -1,12 +1,12 @@
 import { useState, useEffect, memo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../header';
 import { Button } from 'reactstrap';
 function Upgrade({ project }) {
     const [listDataEmployeesSelected, set_listDataEmployeesSelected] = useState(project && project.length > 0 ? project.listEmployee : [])
     const [employees, set_employees] = useState([])
     const [open_modal_employees, set_open_modal_employees] = useState(false)
-
+    const navigate = useNavigate();
     useEffect(() => {
         // Lấy danh sách nhân viên từ API
         fetch('http://127.0.0.1:5000/employees', {
@@ -52,19 +52,7 @@ function Upgrade({ project }) {
                             <td>
                                 <Button
                                     onClick={() => {
-                                        // Thêm hoặc xóa nhân viên khỏi danh sách được chọn
-                                        const isSelected = listDataEmployeesSelected.some(
-                                            (item) => item.id === employee.id
-                                        );
-                                        if (isSelected) {
-                                            const updatedListData = listDataEmployeesSelected.filter(
-                                                (item) => item.id !== employee.id
-                                            );
-                                            set_listDataEmployeesSelected(updatedListData);
-                                        } else {
-                                            const updatedListData = [...listDataEmployeesSelected, employee];
-                                            set_listDataEmployeesSelected(updatedListData);
-                                        }
+                                        navigate('/upgrade/' + employee.id);
                                     }}
                                 >
                                     Edit

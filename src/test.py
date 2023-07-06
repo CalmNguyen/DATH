@@ -150,22 +150,123 @@ mydb = mysql.connector.connect(
 )
 # Tạo đối tượng cursor để thực hiện truy vấn SQL
 cursor = mydb.cursor(dictionary=True)
+#lấy tất cả các thống kê theo nhãn
+#thống kê theo nhãn
+@app.route('/api/statistics/<int:project_id>', methods=['GET'])
+def get_statistics(project_id):
+    query = """
+    SELECT de.col1, de.nhan
+    FROM data_employee de
+    JOIN employee_project ep ON de.employee_project_id = ep.id
+    JOIN project p ON p.id = ep.projectID
+    WHERE p.type='Type 1' AND p.id=%s
+    """
 
+    cursor.execute(query, (project_id,))
+    results = cursor.fetchall()
+
+    # Thực hiện thống kê
+    statistics = {}
+    list_nhan = []
+
+    for row in results:
+        col1 = row['col1']
+        nhan = row['nhan']
+
+        if nhan not in statistics:
+            statistics[nhan] = 1
+            list_nhan.append(nhan)
+        else:
+            statistics[nhan] += 1
+
+    # Chỉnh lại định dạng của kết quả
+    formatted_results = []
+    for row in results:
+        formatted_row = {'col1': row['col1'], 'nhan': row['nhan']}
+        formatted_results.append(formatted_row)
+
+    # Tạo đối tượng JSON response
+    response = {
+        'result': 1,
+        'message': 'Statistics retrieved successfully',
+        'results': formatted_results,
+        'statistics': statistics,
+        'list_nhan': list_nhan
+    }
+
+    return jsonify(response)
+
+#đăng ký
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    # Lấy dữ liệu từ request
+    data = request.json
+    email = data['email']
+    password = data['password']
+    admin_type = data['type']
+    name = data['name']
+    fullname = data['fullname']
+
+    try:
+        # Tạo tài khoản trong bảng admin
+        query = "INSERT INTO admin (email, password, type,fullname) VALUES (%s, %s, %s,%s)"
+        values = (email, password, admin_type,fullname)
+        cursor.execute(query, values)
+        admin_id = cursor.lastrowid
+
+        # Thêm tài khoản tương ứng vào bảng employee
+        query = "INSERT INTO employee (id, name, level, status) VALUES (%s, %s, %s, %s)"
+        values = (admin_id, name, 'Level 1', 'Active')
+        cursor.execute(query, values)
+
+        # Lưu thay đổi vào cơ sở dữ liệu
+        mydb.commit()
+
+        return jsonify({'result': 1, 'message': 'Tạo tài khoản thành công'})
+    except Exception as e:
+        mydb.rollback()
+        return jsonify({'result': 0, 'message': 'Lỗi: ' + str(e)}), 500
+#cập nhật nhân viên
+@app.route('/api/employees/<int:employee_id>', methods=['POST'])
+def update_employee(employee_id):
+    # Lấy dữ liệu từ request
+    data = request.get_json()
+
+    # Kiểm tra xem nhân viên có tồn tại trong CSDL không
+    query = "SELECT * FROM employee WHERE id = %s"
+    cursor.execute(query, (employee_id,))
+    employee = cursor.fetchone()
+
+    if employee:
+        # Cập nhật thông tin của nhân viên
+        query = "UPDATE employee SET name = %s, level = %s, status = %s WHERE id = %s"
+        cursor.execute(query, (data['name'], data['level'], data['status'], employee_id))
+        mydb.commit()
+
+        # Trả về JSON response cho biết cập nhật thành công
+        json_data = jsonify({'result': 1, 'message': 'Cập nhật nhân viên thành công'})
+        return json_data
+    else:
+        json_data = jsonify({'result': 0, 'message': 'Không tìm thấy nhân viên'})
+        return json_data, 404
+#lấy 1 nhân viên
 @app.route('/api/employees/<int:employee_id>', methods=['GET'])
 def get_employee(employee_id):
     # Truy vấn nhân viên dựa trên ID
     query = "SELECT * FROM employee WHERE id = %s"
     cursor.execute(query, (employee_id,))
     employee = cursor.fetchone()
-
+    print(employee)
     if employee:
         # Trả về JSON response chứa thông tin của nhân viên
-        employee_data = {
-            'id': employee[0],
-            'name': employee[1],
-            'level': employee[2],
-            'status': employee[3]
-        }
+        employee_data = employee
+        # {
+        #     'id': employee['id'],
+        #     'name': employee[1],
+        #     'level': employee[2],
+        #     'status': employee[3]
+        # }
 
         json_data = jsonify({'result': 1, 'message': 'Thành công', 'data': employee_data})
         return json_data
