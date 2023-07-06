@@ -1,4 +1,5 @@
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useContext } from 'react';
+import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom'
 import '../App.css';
 import '../css/style.css'
 import '../style/bootstrap.css'
@@ -11,8 +12,10 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import React from 'react';
 import { Button } from 'reactstrap';
-
+import { auth } from '../auth';
+import Header from '../header'
 function QuanLyTaiKhoan({ project }) {
+    const { isLogin, user, setUser, setIsLogin } = useContext(auth);
     const [type, set_type] = useState(project && project.length > 0 ? project.type.type : "1")
     const [open_chon_nhan, set_open_chon_nhan] = useState(false)
     const [listData, set_listData] = useState(project && project.length > 0 ? project.type.listNhan : [])
@@ -53,30 +56,44 @@ function QuanLyTaiKhoan({ project }) {
             });
     }, [])
     const createProject = async () => {
-        let data_post = {
-            "nameProject": nameProject,
-            "type": {
-                "type": type,
-                "listNhan": listData,
-                "language": language
+        const data_post = {
+            nameProject: nameProject,
+            type: {
+                type: type,
+                listNhan: listData,
+                language: language,
             },
-            "listEmployee": listDataEmployeesSelected,
-            "time": new Date(),
-            "timeEnd": "",
-            "dataSequence": csvData,
-            "maxEmployees": "30",
-            "status": 0
-        }
-        console.log(data_post)
-        return;
+            listEmployee: listDataEmployeesSelected,
+            time: new Date(),
+            timeEnd: "",
+            dataSequence: csvData,
+            maxEmployees: maxEmployees,
+            status: 0,
+            adminID: 1
+        };
+
         try {
-            const response = await fetch('http://127.0.0.1:5500/src/json/listEmployee.json'); // Thay đổi URL thành API bạn muốn gọi
-            const jsonData = await response.json();
-            console.log(jsonData)
+            const response = await fetch("http://127.0.0.1:5000/api/create-project", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data_post),
+            });
+
+            if (response.ok) {
+                const jsonData = await response.json();
+                console.log(jsonData);
+                // Xử lý thành công
+            } else {
+                // Xử lý lỗi
+                throw new Error("Error: " + response.status);
+            }
         } catch (error) {
-            console.log('Error:', error);
+            console.log("Error:", error);
         }
-    }
+    };
+
     const submit = async () => {
         const project = {
             "nameProject": "Gán nhãn",
@@ -116,10 +133,12 @@ function QuanLyTaiKhoan({ project }) {
     const [maxEmployees, set_maxEmployees] = useState(0)
     return (
         <div>
+            <nav className="navbar">
+                <Header />
+            </nav>
             <h1 style={{ paddingLeft: 10 }}>
                 Tạo dự án
             </h1>
-
             <form style={{ margin: 20 }}>
                 <div class="form-group" style={{ width: '85%' }}>
                     <label for="exampleFormControlInput1">Tên dự án</label>
@@ -131,13 +150,13 @@ function QuanLyTaiKhoan({ project }) {
                         set_type(event.target.value)
                     }
                     } >
-                        <option value="1">Phân loại văn bản</option>
-                        <option value="2">Hỏi đáp</option>
-                        <option value="3">Dịch máy</option>
-                        <option value="4">Gán nhãn thực thể</option>
-                        <option value="5">Gán nhãn cặp văn bản đồng nghĩa</option>
-                        <option value="6">Gán nhãn câu trả lời của cặp câu hỏi và văn bản</option>
-                        <option value="7">Tìm câu hỏi đồng nghĩa</option>
+                        <option value="Type 1">Phân loại văn bản</option>
+                        <option value="Type 2">Hỏi đáp</option>
+                        <option value="Type 3">Dịch máy</option>
+                        <option value="Type 4">Gán nhãn thực thể</option>
+                        <option value="Type 5">Gán nhãn cặp văn bản đồng nghĩa</option>
+                        <option value="Type 6">Gán nhãn câu trả lời của cặp câu hỏi và văn bản</option>
+                        <option value="Type 7">Tìm câu hỏi đồng nghĩa</option>
                     </select>
                 </div>
                 {type == 3 && (

@@ -9,6 +9,7 @@
     "bootstrap": "^5.3.0",
     "chart": "^0.1.2",
     "chart.js": "^4.3.0",
+    "mdb-react-ui-kit": "^6.1.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-csv": "^2.2.2",

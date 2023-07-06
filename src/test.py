@@ -5,7 +5,8 @@ import json
 import mysql.connector
 app = Flask(__name__)
 CORS(app)
-
+#api gọi: login, projects, projectn/id, edit-project/id, post projects/id
+#các api trên là lấy dữ liệu từ sql
 # Tạo một danh sách đối tượng (mock data)
 todos = [
     {'id': 1, 'title': 'Buy groceries', 'completed': False},
@@ -147,13 +148,220 @@ mydb = mysql.connector.connect(
     password="",
     database="udpt"
 )
+# Tạo đối tượng cursor để thực hiện truy vấn SQL
+cursor = mydb.cursor(dictionary=True)
+
+@app.route('/api/employees/<int:employee_id>', methods=['GET'])
+def get_employee(employee_id):
+    # Truy vấn nhân viên dựa trên ID
+    query = "SELECT * FROM employee WHERE id = %s"
+    cursor.execute(query, (employee_id,))
+    employee = cursor.fetchone()
+
+    if employee:
+        # Trả về JSON response chứa thông tin của nhân viên
+        employee_data = {
+            'id': employee[0],
+            'name': employee[1],
+            'level': employee[2],
+            'status': employee[3]
+        }
+
+        json_data = jsonify({'result': 1, 'message': 'Thành công', 'data': employee_data})
+        return json_data
+    else:
+        json_data = jsonify({'result': 0, 'message': 'Không tìm thấy nhân viên'})
+        return json_data, 404
+
+@app.route('/projectn/<int:id>', methods=['GET'])
+def getProject(id):
+    # Truy vấn dự án theo ID
+    query = "SELECT * FROM project WHERE id = %s"
+    cursor.execute(query, (id,))
+    project = cursor.fetchone()
+
+    if project:
+        # Xử lý dữ liệu và trả về JSON response
+        project_data = {
+            "id": project['id'],
+            "nameProject": project['nameProject'],
+            "type": {
+                "type": project['type'],
+                "listNhan": project['listNhan'].split(', '),
+                "language": {
+                    "input": project['input'],
+                    "output": project['output']
+                }
+            },
+            "listEmployee": getListEmployee(id),  # Hàm truy vấn danh sách nhân viên từ bảng employee_project
+            "time": str(project['time']),
+            "timeEnd": str(project['timeEnd']),
+            "dataSequence": getDataSequence(id),  # Hàm truy vấn dữ liệu chuỗi từ bảng data_list
+            "maxEmployees": project['maxEmployees'],
+            "status": project['status']
+        }
+
+        json_data = jsonify({'result': 1, 'message': 'Thành công', 'data': project_data})
+        return json_data
+    else:
+        json_data = jsonify({'result': 0, 'message': 'Không tìm thấy dự án'})
+        return json_data, 404
+
+def getListEmployee(project_id):
+    # Truy vấn danh sách nhân viên từ bảng employee_project
+    query = "SELECT * FROM employee_project JOIN employee ON employee_project.employeeID = employee.id WHERE employee_project.projectID = %s"
+    cursor.execute(query, (project_id,))
+    employees = cursor.fetchall()
+
+    list_employee = []
+    for employee in employees:
+        list_employee.append({
+            'id': employee['id'],
+            'name': employee['name'],
+            'level': employee['level'],
+            # 'project_join': employee['project_join'],
+            'status': employee['status']
+        })
+
+    return list_employee
+
+def getDataSequence(project_id):
+    # Truy vấn dữ liệu chuỗi từ bảng data_list
+    query = "SELECT col1, col2 FROM data_list WHERE data_id = %s"
+    cursor.execute(query, (project_id,))
+    data_rows = cursor.fetchall()
+
+    data_sequence = []
+    for row in data_rows:
+        data_sequence.append([row['col1'], row['col2']])
+
+    return data_sequence
+
+@app.route('/api/create-project', methods=['POST'])
+def create_project():
+    # Lấy dữ liệu từ request
+    project_data = request.json
+
+    # Lưu dữ liệu từ project vào bảng project
+    query = "INSERT INTO project (adminID, nameProject, type, listNhan, time, timeEnd, maxEmployees, status, input, output, dataID) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    values = (
+        project_data['adminID'],
+        project_data['nameProject'],
+        project_data['type']['type'],
+        ','.join(project_data['type']['listNhan']),
+        project_data['time'],
+        project_data['timeEnd'],
+        project_data['maxEmployees'],
+        project_data['status'],
+        project_data['type']['language']['input'],
+        project_data['type']['language']['output'],
+        None  # Id dữ liệu sẽ được cập nhật sau khi thêm dòng vào bảng data
+    )
+    cursor.execute(query, values)
+
+    # Lấy id của dự án vừa tạo
+    project_id = cursor.lastrowid
+
+    # Thêm dữ liệu vào bảng data
+    query = "INSERT INTO data (name) VALUES (%s)"
+    cursor.execute(query, ('New Data',))
+
+    # Lấy id của dữ liệu mới
+    data_id = cursor.lastrowid
+
+    # Cập nhật id dữ liệu trong bảng project
+    query = "UPDATE project SET dataID = %s WHERE id = %s"
+    cursor.execute(query, (data_id, project_id))
+
+    # Lưu dữ liệu từ dataSequence vào bảng data_list
+    data_sequence = project_data['dataSequence']
+
+    for sequence in data_sequence:
+        if len(sequence) >= 2:
+            col1 = sequence[0]
+            col2 = sequence[1]
+            col3 = sequence[2] if len(sequence) >= 3 else None
+
+            # Lưu dữ liệu vào bảng data_list
+            query = "INSERT INTO data_list (col1, col2, col3, data_id) VALUES (%s, %s, %s, %s)"
+            cursor.execute(query, (col1, col2, col3, data_id))
+
+    # Lưu danh sách employee vào bảng employee_project
+    employee_list = project_data['listEmployee']
+
+    for employee in employee_list:
+        employee_id = employee['id']
+
+        # Lưu dữ liệu vào bảng employee_project
+        query = "INSERT INTO employee_project (projectID, employeeID) VALUES (%s, %s)"
+        cursor.execute(query, (project_id, employee_id))
+
+    # Lưu thay đổi vào cơ sở dữ liệu
+    mydb.commit()
+
+    return jsonify({'message': 'Project created successfully'})
+
+@app.route('/api/edit-project/<int:project_id>', methods=['POST'])
+def edit_project(project_id):
+    project_data = request.json
+    # Cập nhật dữ liệu của dự án trong bảng project
+    query = "UPDATE project SET adminID = %s, nameProject = %s, type = %s, listNhan = %s, time = %s, timeEnd = %s, maxEmployees = %s, status = %s, input = %s, output = %s WHERE id = %s"
+    values = (
+        project_data['adminID'],
+        project_data['nameProject'],
+        project_data['type']['type'],
+        ','.join(project_data['type']['listNhan']),
+        project_data['time'],
+        project_data['timeEnd'],
+        project_data['maxEmployees'],
+        project_data['status'],
+        project_data['type']['language']['input'],
+        project_data['type']['language']['output'],
+        project_id
+    )
+    cursor.execute(query, values)
+
+    # Xóa các dữ liệu cũ trong bảng data_list liên quan đến dự án
+    query = "DELETE FROM data_list WHERE data_id IN (SELECT dataID FROM project WHERE id = %s)"
+    cursor.execute(query, (project_id,))
+
+    # Lưu dữ liệu từ dataSequence vào bảng data_list
+    data_sequence = project_data['dataSequence']
+
+    for sequence in data_sequence:
+        if len(sequence) >= 2:
+            col1 = sequence[0]
+            col2 = sequence[1]
+            col3 = sequence[2] if len(sequence) >= 3 else None
+
+            # Lưu dữ liệu vào bảng data_list
+            query = "INSERT INTO data_list (col1, col2, col3, data_id) VALUES (%s, %s, %s, (SELECT dataID FROM project WHERE id = %s))"
+            cursor.execute(query, (col1, col2, col3, project_id))
+
+    # Xóa các dữ liệu cũ trong bảng employee_project liên quan đến dự án
+    query = "DELETE FROM employee_project WHERE projectID = %s"
+    cursor.execute(query, (project_id,))
+
+    # Lưu danh sách employee vào bảng employee_project
+    employee_list = project_data['listEmployee']
+
+    for employee in employee_list:
+        employee_id = employee['id']
+        # Lưu dữ liệu vào bảng employee_project
+        query = "INSERT INTO employee_project (projectID, employeeID) VALUES (%s, %s)"
+        cursor.execute(query, (project_id, employee_id))
+
+    # Lưu thay đổi vào cơ sở dữ liệu
+    mydb.commit()
+    # Trả về JSON response với thuộc tính "result"
+    return jsonify({'result': 1, 'message': 'Project updated successfully'})
+
 @app.route('/login', methods=['POST'])
 def check_login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
 
-    cursor = mydb.cursor()
     query = "SELECT * FROM admin WHERE email = %s AND password = %s"
     values = (email, password)
     cursor.execute(query, values)
@@ -165,9 +373,9 @@ def check_login():
         result = {"result": 0, "message": "Email hoặc mật khẩu không đúng"}
 
     return jsonify(result)
+
 @app.route('/employees', methods=['GET'])
 def get_employees():
-    cursor = mydb.cursor()
     query = "SELECT * FROM employee"
     cursor.execute(query)
     employees = cursor.fetchall()
@@ -175,11 +383,10 @@ def get_employees():
     employee_list = []
     for employee in employees:
         employee_object = {
-            'id': employee[0],
-            'name': employee[1],
-            'level': employee[2],
-            'project_join': employee[3],
-            'status': employee[4]
+            'id': employee['id'],
+            'name': employee['name'],
+            'level': employee['level'],
+            'status': employee['status']
         }
         employee_list.append(employee_object)
 
@@ -189,55 +396,76 @@ def get_employees():
         result = {"result": 0, "message": "Không có nhân viên", "data": []}
 
     return jsonify(result)
+
 @app.route('/projects', methods=['GET'])
-def get_projects():
-    cursor = mydb.cursor()
+def getProjects():
+    # Truy vấn danh sách dự án
     query = "SELECT * FROM project"
     cursor.execute(query)
     projects = cursor.fetchall()
 
     project_list = []
     for project in projects:
-        project_id = project[0]  # ID của dự án
-        employees_query = f"SELECT employeeID FROM employee_project WHERE projectID = {project_id}"
-        cursor.execute(employees_query)
-        employee_rows = cursor.fetchall()
-
-        employee_list = [employee_row[0] for employee_row in employee_rows]  # Lấy danh sách id của employees
-
-        project_object = {
-            'id': project[0],
-            'nameProject': project[1],
-            'type': {
-                'type': project[2],
-                'listNhan': project[3].split(","),
-                'language': {
-                    'input': project[8],
-                    'output': project[9]
+        project_data = {
+            "id": project['id'],
+            "nameProject": project['nameProject'],
+            "type": {
+                "type": project['type'],
+                "listNhan": project['listNhan'].split(', '),
+                "language": {
+                    "input": project['input'],
+                    "output": project['output']
                 }
             },
-            'listEmployee': employee_list,
-            'time': project[4],
-            'timeEnd': project[5],
-            'dataSequence': project[10],
-            'maxEmployees': project[6],
-            'status': project[7]
+            "listEmployee": getListEmployee(project['id']),  # Hàm truy vấn danh sách nhân viên từ bảng employee_project
+            "time": str(project['time']),
+            "timeEnd": str(project['timeEnd']),
+            "dataSequence": getDataSequence(project['id']),  # Hàm truy vấn dữ liệu chuỗi từ bảng data_list
+            "maxEmployees": project['maxEmployees'],
+            "status": project['status']
         }
-        project_list.append(project_object)
+        project_list.append(project_data)
 
-    if project_list:
-        result = {"result": 1, "message": "Lấy danh sách dự án thành công", "data": project_list}
+    json_data = jsonify({'result': 1, 'message': 'Thành công', 'data': project_list})
+    return json_data
+
+
+@app.route('/update-employee/<int:id>', methods=['POST'])
+def updateEmployee(id):
+    # Kiểm tra xem người dùng có tồn tại không
+    query = "SELECT * FROM employee WHERE id = %s"
+    cursor.execute(query, (id,))
+    employee = cursor.fetchone()
+
+    if employee:
+        # Lấy dữ liệu mới từ request body
+        updated_data = request.get_json()
+
+        # Cập nhật thông tin người dùng
+        update_query = "UPDATE employee SET name = %s, level = %s, project_join = %s, status = %s WHERE id = %s"
+        cursor.execute(update_query, (
+            updated_data.get('name', employee['name']),
+            updated_data.get('level', employee['level']),
+            updated_data.get('project_join', employee['project_join']),
+            updated_data.get('status', employee['status']),
+            id
+        ))
+        mydb.commit()
+
+        json_data = jsonify({'result': 1, 'message': 'Cập nhật thông tin người dùng thành công'})
+        return json_data
     else:
-        result = {"result": 0, "message": "Không có dự án", "data": []}
+        json_data = jsonify({'result': 0, 'message': 'Không tìm thấy người dùng'})
+        return json_data, 404
 
-    return jsonify(result)
+
 
 @app.route("/t", methods=['GET'])
 def index():
     # Xử lý và truy vấn dữ liệu từ cơ sở dữ liệu
-    mycursor = mydb.cursor()
-    mycursor.execute("SELECT * FROM account")
-    result = mycursor.fetchall()
+    mymydb = mydb.mydb()
+    mymydb.execute("SELECT * FROM account")
+    result = mymydb.fetchall()
 
     # Trả lại dữ liệu dưới dạng JSON
     return jsonify(result)
@@ -246,55 +474,6 @@ def index():
 def get_todos():
     return jsonify(todos)
 
-# API endpoint để lấy một công việc cụ thể
-@app.route('/todos/<int:todo_id>', methods=['GET'])
-def get_todo_by_id(todo_id):
-    todo = [todo for todo in todos if todo['id'] == todo_id]
-    if len(todo) == 0:
-        return jsonify({'error': 'Todo not found'})
-    return jsonify(todo[0])
-
-# API endpoint để tạo một công việc mới
-@app.route('/todos', methods=['POST'])
-def create_todo():
-    new_todo = {
-        'id': todos[-1]['id'] + 1,
-        'title': request.json['title'],
-        'completed': False
-    }
-    todos.append(new_todo)
-    return jsonify(new_todo), 201, 1
-
-# API endpoint để cập nhật một công việc
-@app.route('/todos/<int:todo_id>', methods=['PUT'])
-def update_todo(todo_id):
-    todo = [todo for todo in todos if todo['id'] == todo_id]
-    if len(todo) == 0:
-        return jsonify({'error': 'Todo not found'})
-    todo[0]['title'] = request.json.get('title', todo[0]['title'])
-    todo[0]['completed'] = request.json.get('completed', todo[0]['completed'])
-    return jsonify(todo[0])
-
-# API endpoint để xóa một công việc
-@app.route('/todos/<int:todo_id>', methods=['DELETE'])
-def delete_todo(todo_id):
-    todo = [todo for todo in todos if todo['id'] == todo_id]
-    if len(todo) == 0:
-        return jsonify({'error': 'Todo not found'})
-    todos.remove(todo[0])
-    return jsonify({'result': True})
-
-@app.route('/danh-sach-project', methods=['GET'])
-def getDSProject():
-    data = [{'ProjectName': 'Thêm nhãn', "type":2,"data":[['Câu 1','Câu 2'],['Câu 1','Câu 2'],['Câu 1','Câu 2']],"employees":['1','9','12','23'],"limitEmp":'30',"status":0, "time":'',"last_time":""}]
-    json_data = json.dumps({'result': 1, 'message':'Thành công','data': data }, ensure_ascii=False).encode('utf-8')
-
-    response = app.response_class(
-        response=json_data,
-        status=200,
-        mimetype='application/json'
-    )
-    return response
 @app.route('/login', methods=['POST'])
 def login():
     raw_data = request.get_data()  # Lấy dữ liệu raw từ yêu cầu
@@ -326,14 +505,7 @@ def listProject():
     status=200,
     mimetype='application/json')
     return response
-@app.route('/project/<int:id>', methods=['GET'])
-def getProject(id):
-    json_data = json.dumps({'result': 1, 'message':'Thành công','data': project}, ensure_ascii=False).encode('utf-8')
-    response = app.response_class(
-    response=json_data,
-    status=200,
-    mimetype='application/json')
-    return response
+
 @app.route('/list-employees', methods=['GET'])
 def listEmployees():
     json_data = json.dumps({'result': 1, 'message':'Thành công','data': employees}, ensure_ascii=False).encode('utf-8')

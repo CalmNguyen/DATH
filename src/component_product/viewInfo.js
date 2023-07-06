@@ -9,7 +9,7 @@ import { AiFillCloseCircle, AiFillCheckCircle, AiTwotoneEdit } from "react-icons
 import { IconName } from "react-icons/fa";
 import ReadFile from '../component_read/ReadFile'
 import ModalEmployees from '../component_read/ModalEmployees';
-import Header from '../header'
+
 function EditProject({ project }) {
     const { id } = useParams();
     const [type, set_type] = useState(project && project.length > 0 ? project.type.type : "1")
@@ -69,7 +69,6 @@ function EditProject({ project }) {
                     set_language(data.type.language)
                     set_listDataEmployeesSelected(data.listEmployee)
                     setCSVData(data.dataSequence)
-                    set_maxEmployees(data.maxEmployees)
                 }
                 else {
                     alert(actualData.message)
@@ -88,7 +87,7 @@ function EditProject({ project }) {
             time: new Date(),
             timeEnd: "",
             dataSequence: csvData,
-            maxEmployees: maxEmployees,
+            maxEmployees: "30",
             status: 0,
             adminID: 1,
         };
@@ -102,7 +101,7 @@ function EditProject({ project }) {
                 body: JSON.stringify(data_post),
             });
             console.log(response)
-            if (response.status == 200) {
+            if (response.result == '1') {
                 const jsonData = await response.json();
                 console.log(jsonData);
                 alert("Thành công")
@@ -115,12 +114,11 @@ function EditProject({ project }) {
             console.log("Error:", error);
         }
     };
-    const [maxEmployees, set_maxEmployees] = useState(0)
+
     return (
         <div>
-            <Header />
             <h1 style={{ paddingLeft: 10 }}>
-                Sửa đổi dự án
+                Chi tiết dự án
             </h1>
             {/* <button onClick={() => setCSVData(csvData)}>Export CSV</button>
             {csvData.length > 0 && (
@@ -153,14 +151,14 @@ function EditProject({ project }) {
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu vào</label>
                             <div >
-                                <input style={{ flex: 1, width: '90%' }} value={language.input} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
+                                <input readOnly style={{ flex: 1, width: '90%' }} value={language.input} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
                             </div>
                         </div>
 
                         <div style={{ width: '42.5%' }}>
                             <label htmlFor="exampleFormControlInput1">Nhập ngôn ngữ đầu ra</label>
                             <div >
-                                <input style={{ flex: 1, width: '100%' }} value={language.output} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
+                                <input readOnly style={{ flex: 1, width: '100%' }} value={language.output} type="text" className="form-control" id="exampleFormControlInput1" placeholder="" />
                             </div>
                         </div>
                     </div>
@@ -188,7 +186,7 @@ function EditProject({ project }) {
                     </div>
                     {open_them_nhan && (<div className='form-group' style={{ display: 'flex', flexDirection: 'row', marginTop: 10 }}>
                         <div style={{ width: '60%', display: 'flex', flexDirection: 'row', border: '1px solid #736F6E', alignItems: 'center', borderRadius: 5, flexWrap: 'wrap' }}>
-                            <input type="text" value={nhan} onChange={(event) => set_nhan(event.target.value)} class="form-control" id="exampleFormControlInput1" placeholder="Gán nhãn phân loại thông tin"></input>
+                            <input readOnly type="text" value={nhan} onChange={(event) => set_nhan(event.target.value)} class="form-control" id="exampleFormControlInput1" placeholder="Gán nhãn phân loại thông tin"></input>
                         </div>
                         <button onClick={() => {
                             set_open_them_nhan(false)
@@ -236,16 +234,7 @@ function EditProject({ project }) {
                 {csvData.length !== 0 && (<div style={{ marginTop: 20 }}>
                     <button style={{ borderWidth: 0.5, padding: 5 }} type="button" onClick={() => set_open_detail(true)}>Xem chi tiết dữ liệu</button>
                 </div>)}
-                <div class="form-group" style={{ width: '85%' }}>
-                    <label for="exampleFormControlInput1">Số người tham gia tối đa</label>
-                    <input onChange={(event) => set_maxEmployees(event.target.value)} value={maxEmployees} type="text" class="form-control" id="exampleFormControlInput1" placeholder="30"></input>
-                </div>
-                <div className='form-group' style={{ marginTop: 50, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={() => editProject()}
-                        className='button-qltk' type='button' style={{ width: '20%', padding: 5, fontSize: 18, borderRadius: 10, marginRight: 30 }}>
-                        Gửi
-                    </button>
-                </div>
+
             </form>
         </div>
     );
