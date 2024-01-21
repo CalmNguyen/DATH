@@ -1,0 +1,19 @@
+.container {
+    background-image: url('./img/house.png');
+    /* Thay 'path_to_your_image.jpg' bằng đường dẫn đến hình ảnh nền */
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    /* Đảm bảo chiều cao bằng chiều cao của màn hình */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.centered-text {
+    color: white;
+    /* Màu chữ trắng */
+    font-size: 24px;
+    /* text-align: center; */
+}

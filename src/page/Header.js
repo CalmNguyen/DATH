@@ -33,7 +33,7 @@ const Header = () => {
                 {/* Menu Dropdown */}
                 <Dropdown overlay={menu} placement="bottomRight">
                     <a className="ant-dropdown-link" onClick={(e) => e.preventDefault()}>
-                        Click me <DownOutlined />
+                        Chuyển chữ sang tiếng nói <DownOutlined />
                     </a>
                 </Dropdown>
             </div>

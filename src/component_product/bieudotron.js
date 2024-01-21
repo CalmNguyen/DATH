@@ -49,6 +49,29 @@ const App = () => {
         "maxEmployees": "30",
         "status": 1
     })
+
+    useEffect(() => {
+        fetch('http://127.0.0.1:5000/projectn/' + id, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + 'token'
+            },
+            timeout: 2000,
+            // body: JSON.stringify([]),
+        }).then((response) => response.json())
+            .then((actualData) => {
+                // console.log('in')
+                console.log(actualData)
+                if (actualData.result == 1) {
+                    set_project(actualData.data)
+                }
+                else {
+                    alert(actualData.message)
+                }
+            });
+    }, [])
     useEffect(() => {
         fetch('http://127.0.0.1:5000/list-employees', {
             method: 'GET',
@@ -159,8 +182,9 @@ const App = () => {
             <h2 style={{ margin: 20, marginTop: 60 }}>Thống kê theo người gán nhãn</h2>
             <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <div style={{ width: '50%' }}>
+                    <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Đã hoàn thành</h2>
                     {
-                        project.listEmployee.filter((items) => items.status === 0).map((item, index) => (
+                        project.listEmployee.filter((items) => items.status === 'Active').map((item, index) => (
                             <div style={{ display: 'flex', flexDirection: 'row', marginLeft: 20 }}>
                                 <p style={{ color: item.status == 0 ? 'black' : 'green', marginRight: 20 }}>
                                     {item.id} - {item.name} - Cấp: {item.level}
@@ -170,17 +194,18 @@ const App = () => {
                                 <a style={{ color: 'blue', marginLeft: 20, marginRight: 30 }}>
                                     Điều chỉnh nhãn <span><AiTwotoneEdit /></span>
                                 </a>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                {/* <div style={{ display: 'flex', flexDirection: 'row' }}>
                                     <p style={{ color: 'red' }}>Xoá khỏi dự án</p>
                                     <AiFillCloseCircle size={18} color='red' style={{ marginTop: 5, marginLeft: 10 }} />
-                                </div>
+                                </div> */}
                             </div>
                         ))
                     }
                 </div>
                 <div style={{ width: '50%' }}>
+                    <h2 style={{ textAlign: 'center', marginBottom: 20 }}>Chưa hoàn thành</h2>
                     {
-                        project.listEmployee.filter((items) => items.status === 1).map((item, index) => (
+                        project.listEmployee.filter((items) => items.status === 'Inactive').map((item, index) => (
                             <div style={{ display: 'flex', flexDirection: 'row', marginLeft: 20 }}>
                                 <p style={{ color: item.status == 0 ? 'black' : 'green', marginRight: 20 }}>
                                     {item.id} - {item.name} - Cấp: {item.level}
@@ -190,10 +215,10 @@ const App = () => {
                                 <a style={{ color: 'blue', marginLeft: 20, marginRight: 30 }}>
                                     Điều chỉnh nhãn <span><AiTwotoneEdit /></span>
                                 </a>
-                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                {/* <div style={{ display: 'flex', flexDirection: 'row' }}>
                                     <p style={{ color: 'red' }}>Xoá khỏi dự án</p>
                                     <AiFillCloseCircle size={18} color='red' style={{ marginTop: 5, marginLeft: 10 }} />
-                                </div>
+                                </div> */}
                             </div>
                         ))
                     }

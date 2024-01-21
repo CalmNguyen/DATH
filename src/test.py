@@ -150,6 +150,87 @@ mydb = mysql.connector.connect(
 )
 # Tạo đối tượng cursor để thực hiện truy vấn SQL
 cursor = mydb.cursor(dictionary=True)
+#api thống kê
+@app.route('/api/thong-ke', methods=['GET'])
+def statistics():
+    try:
+        # Tính tổng số dòng trong bảng data_list
+        query = "SELECT COUNT(*) FROM data_list"
+        cursor.execute(query)
+        data_list_count = cursor.fetchone()['COUNT(*)']
+        # Tính tổng số dòng trong bảng employee
+        query = "SELECT COUNT(*) FROM employee"
+        cursor.execute(query)
+        employee_count = cursor.fetchone()['COUNT(*)']
+
+        # Tính tổng số dòng trong bảng project
+        query = "SELECT COUNT(*) FROM project"
+        cursor.execute(query)
+        project_count = cursor.fetchone()['COUNT(*)']
+
+        # Tính tổng số người dùng level 3 trong bảng employee
+        query = "SELECT COUNT(*) FROM employee WHERE level = 'Level 3'"
+        cursor.execute(query)
+        level_3_count = cursor.fetchone()['COUNT(*)']
+        # Tính tổng số project đã hoàn thành
+        query = "SELECT COUNT(*) FROM project where status=1"
+        cursor.execute(query)
+        project_finished = cursor.fetchone()['COUNT(*)']
+        response = {
+            'result': 1,
+            'message': 'Statistics retrieved successfully',
+            'dataListCount': data_list_count,
+            'employeeCount': employee_count,
+            'projectCount': project_count,
+            'projectFinished': project_finished,
+            'level3Count': level_3_count
+        }
+        
+        return jsonify(response)
+
+    except Exception as e:
+        # Xảy ra lỗi trong quá trình thực hiện truy vấn
+        response = {
+            'result': 0,
+            'message': 'Failed to retrieve statistics'
+        }
+        return jsonify(response), 500
+
+#import data
+@app.route('/api/add-data-list', methods=['POST'])
+def add_data_list():
+    data_list_data = request.json
+    try:
+        # Lưu dữ liệu vào bảng data
+        query = "INSERT INTO data (name) VALUES (%s)"
+        cursor.execute(query, (data_list_data['name'],))
+
+        # Lấy id của dữ liệu vừa tạo
+        data_id = cursor.lastrowid
+
+        # Lưu dữ liệu từ dataSequence vào bảng data_list
+        data_sequence = data_list_data['dataSequence']
+
+        for sequence in data_sequence:
+            if len(sequence) >= 2:
+                col1 = sequence[0]
+                col2 = sequence[1]
+                col3 = sequence[2] if len(sequence) >= 3 else None
+
+                # Lưu dữ liệu vào bảng data_list
+                query = "INSERT INTO data_list (col1, col2, col3, data_id) VALUES (%s, %s, %s, %s)"
+                cursor.execute(query, (col1, col2, col3, data_id))
+
+        # Lưu thay đổi vào cơ sở dữ liệu
+        mydb.commit()
+
+        response = {'result': 1, 'message': 'Data added to data_list successfully'}
+    except Exception as e:
+        # Xảy ra lỗi, không thể thêm dữ liệu
+        response = {'result': 0, 'message': 'Failed to add data to data_list'}
+
+    return jsonify(response)
+
 #lấy tất cả các thống kê theo nhãn
 #thống kê theo nhãn
 @app.route('/api/statistics/<int:project_id>', methods=['GET'])
@@ -462,16 +543,16 @@ def check_login():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
-
-    query = "SELECT * FROM admin WHERE email = %s AND password = %s"
-    values = (email, password)
+    type = 'admin'
+    query = "SELECT * FROM admin WHERE email = %s AND password = %s and type = %s"
+    values = (email, password, type)
     cursor.execute(query, values)
     admin = cursor.fetchone()
 
     if admin:
         result = {"result": 1, "message": "Đăng nhập thành công"}
     else:
-        result = {"result": 0, "message": "Email hoặc mật khẩu không đúng"}
+        result = {"result": 0, "message": "Sai thông tin hoặc vai trò không phải admin"}
 
     return jsonify(result)
 

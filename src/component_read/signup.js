@@ -55,7 +55,7 @@ function SignUpForm() {
                 if (data.result === 1) {
                     // Tạo tài khoản thành công, điều hướng tới trang đăng nhập
                     alert("Tạo tài khoản thành công")
-                    navigate('/home');
+                    navigate('/');
                 } else {
                     // Hiển thị thông báo lỗi
                     alert(data.message);
