@@ -92,6 +92,7 @@ const TextToVoice = () => {
         return listSentence
     }
     const handleInputCaptcha = (e) => {
+        console.log(e.target.value)
         setCaptchaText(e.target.value);
         setJson({ ...json, "user_input_captcha_text": e.target.value });
     };
@@ -105,7 +106,7 @@ const TextToVoice = () => {
         "user_select_tts_setting_speed": "1.15",
         "user_select_tts_setting_volume": "0",
         "user_select_tts_setting_pitch": "1",
-        "user_input_captcha_text": "6601",
+        "user_input_captcha_text": "4230",
         "user_input_paragraph_pause_time": "-1",
         "user_select_tts_voice_high_quality": "0"
     });
@@ -257,7 +258,7 @@ const TextToVoice = () => {
                                     placeholder='Nhập chữ viết'
                                     value={inputText}
                                     onChange={handleInputChange}
-                                    maxLength={100000}
+                                    maxLength={10000000}
                                 // Thêm paddingTop để đưa text lên phía trên
                                 />
 
