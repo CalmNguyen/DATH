@@ -3,7 +3,7 @@ import { Radio, Select, Space } from 'antd';
 const handleChange = (value) => {
     console.log(`Selected: ${value}`);
 };
-const App = ({ array }) => {
+const App = ({ array, funtionChange }) => {
     const [size, setSize] = useState('middle');
     const handleSizeChange = (e) => {
         setSize(e.target.value);
@@ -19,7 +19,7 @@ const App = ({ array }) => {
                 <Select
                     size={size}
                     defaultValue={array[0].label}
-                    onChange={handleChange}
+                    onChange={funtionChange}
                     style={{
                         width: '100%',
                     }}
